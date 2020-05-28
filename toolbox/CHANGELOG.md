@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- #16724: Editing sample time with unconfigured Session causes error.
 - #16737: Session class should call halted if model does not.
 
 ## [0.1.2]

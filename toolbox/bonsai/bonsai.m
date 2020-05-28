@@ -9,76 +9,82 @@ end
 
 function setup(block)
 
-    % get session instance and logger
+    % skip if session has not been configured (no model set)
     session = bonsai.Session.getInstance();
-    logger = bonsai.Logger('BonsaiBlock', session.config.verbose);
+    if ~isempty(session.model)
 
-    % if not in a training session or stopped state, start assessment
-    simStatus = get_param(session.model, 'SimulationStatus');
-    if ~session.isTrainingSession && ~strcmp(simStatus, 'stopped')
+        % skip if model is in stopped state
+        simStatus = get_param(session.model, 'SimulationStatus');
+        if ~strcmp(simStatus, 'stopped')
 
-        % start assessment session
-        logger.verboseLog('Starting a new assessment session...');
-        session.startNewSession();
+            % if not in a training session, start assessment
+            if ~session.isTrainingSession
 
-        % signal to user they should start assessment in the web
-        fig = uifigure;
-        message = 'Open the Bonsai Portal to begin assessment on your brain.';
-        uialert(fig, message, 'Simulator Registered', 'Icon', 'info', 'CloseFcn', @(h, e) close(fig));
+                % start assessment session
+                logger = bonsai.Logger('BonsaiBlock', session.config.verbose);
+                logger.verboseLog('Starting a new assessment session...');
+                session.startNewSession();
 
-        % begin assessment episode
-        session.startNewEpisode();
+                % signal to user they should start assessment in the web
+                fig = uifigure;
+                message = 'Open the Bonsai Portal to begin assessment on your brain.';
+                uialert(fig, message, 'Simulator Registered', 'Icon', 'info', 'CloseFcn', @(h, e) close(fig));
+
+                % begin assessment episode
+                session.startNewEpisode();
+            end
+        end
+
+        % for readability
+        DOUBLE_TYPE = 0;
+        BOOL_TYPE = 8;
+
+        % set input/output ports
+        block.NumInputPorts = 2;
+        block.NumOutputPorts = 2;
+
+        % state (Vector<Double>)
+        block.InputPort(1).DatatypeID = DOUBLE_TYPE;
+        block.InputPort(1).Dimensions = session.config.numStates;
+        block.InputPort(1).DirectFeedthrough = false;
+
+        % halted (Bool)
+        block.InputPort(2).DatatypeID = BOOL_TYPE;
+        block.InputPort(2).Dimensions = 1;
+        block.InputPort(2).DirectFeedthrough = false;
+
+        % action (Vector<Double>)
+        block.OutputPort(1).DatatypeID = DOUBLE_TYPE;
+        block.OutputPort(1).Dimensions = session.config.numActions;
+        block.OutputPort(1).SamplingMode = 'Sample';
+
+        % reset (Bool)
+        block.OutputPort(2).DatatypeID = BOOL_TYPE;
+        block.OutputPort(2).Dimensions = 1;
+        block.OutputPort(2).SamplingMode = 'Sample';
+
+        % block takes one parameter for sample time
+        block.NumDialogPrms = 1;
+        block.SampleTimes = block.DialogPrm(1).Data;
+    
+        %
+        % SetInputPortSamplingMode:
+        %   Functionality    : Check and set input and output port 
+        %                      attributes and specify whether the port is operating 
+        %                      in sample-based or frame-based mode
+        %
+        block.RegBlockMethod('SetInputPortSamplingMode', @SetInpPortFrameData);
+
+        % for fast restart
+        block.OperatingPointCompliance = 'Default';
+
+        %% Register methods called during update diagram/compilation
+        block.RegBlockMethod('Start', @Start);
+        block.RegBlockMethod('Update', @Update);
+        block.RegBlockMethod('Outputs', @Outputs);
+        block.RegBlockMethod('Terminate', @Terminate);
+
     end
-
-    % for readability
-    DOUBLE_TYPE = 0;
-    BOOL_TYPE = 8;
-
-    % set input/output ports
-    block.NumInputPorts = 2;
-    block.NumOutputPorts = 2;
-
-    % state (Vector<Double>)
-    block.InputPort(1).DatatypeID = DOUBLE_TYPE;
-    block.InputPort(1).Dimensions = session.config.numStates;
-    block.InputPort(1).DirectFeedthrough = false;
-
-    % halted (Bool)
-    block.InputPort(2).DatatypeID = BOOL_TYPE;
-    block.InputPort(2).Dimensions = 1;
-    block.InputPort(2).DirectFeedthrough = false;
-
-    % action (Vector<Double>)
-    block.OutputPort(1).DatatypeID = DOUBLE_TYPE;
-    block.OutputPort(1).Dimensions = session.config.numActions;
-    block.OutputPort(1).SamplingMode = 'Sample';
-
-    % reset (Bool)
-    block.OutputPort(2).DatatypeID = BOOL_TYPE;
-    block.OutputPort(2).Dimensions = 1;
-    block.OutputPort(2).SamplingMode = 'Sample';
-
-    % block takes one parameter for sample time
-    block.NumDialogPrms = 1;
-    block.SampleTimes = block.DialogPrm(1).Data;
- 
-    %
-    % SetInputPortSamplingMode:
-    %   Functionality    : Check and set input and output port 
-    %                      attributes and specify whether the port is operating 
-    %                      in sample-based or frame-based mode
-    %
-    block.RegBlockMethod('SetInputPortSamplingMode', @SetInpPortFrameData);
-
-    % for fast restart
-    block.OperatingPointCompliance = 'Default';
-
-    %% Register methods called during update diagram/compilation
-    block.RegBlockMethod('Start', @Start);
-    block.RegBlockMethod('Update', @Update);
-    block.RegBlockMethod('Outputs', @Outputs);
-    block.RegBlockMethod('Terminate', @Terminate);
-
 end
 
 function Start(block)
