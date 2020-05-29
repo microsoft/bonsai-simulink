@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [0.1.3]
 
 - #16716: Improve message for 401/403 error codes.
 - #16724: Editing sample time with unconfigured Session causes error.
