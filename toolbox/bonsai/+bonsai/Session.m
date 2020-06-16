@@ -202,11 +202,6 @@ classdef Session < handle
 
         function getNextEvent(obj, time, state, halted)
 
-            % write session data to file
-            if obj.config.csvWriterEnabled()
-                obj.csvWriter.addEntry(time, obj.lastEvent.str, state, halted, obj.lastAction, obj.episodeConfig);
-            end
-
             % request next event
             simState = containers.Map(obj.config.stateSchema, state);
             requestData = struct('sequenceId', obj.lastSequenceId, ...
@@ -259,6 +254,11 @@ classdef Session < handle
                 obj.episodeConfig = struct();
             otherwise
                 error(['Received unknown event type: ', r.type]);
+            end
+
+            % write session data to file
+            if obj.config.csvWriterEnabled()
+                obj.csvWriter.addEntry(time, obj.lastEvent.str, state, halted, obj.lastAction, obj.episodeConfig);
             end
         end
 

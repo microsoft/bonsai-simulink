@@ -1,6 +1,9 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+- #17105: Log events to CSV right after they are received.
+
 ## [0.1.3]
 
 - #16716: Improve message for 401/403 error codes.
