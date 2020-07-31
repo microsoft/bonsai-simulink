@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## [0.1.4]
 - #17105: Shift csv logging to happen after a new event is requested.
 
 ## [0.1.3]
