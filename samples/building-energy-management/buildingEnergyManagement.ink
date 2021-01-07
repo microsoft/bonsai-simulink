@@ -65,7 +65,7 @@ graph (input: ObservableState): SimAction {
             }
 
             goal (State: SimState) {
-                minimize `Temp Deviation`:
+                drive `Temp Deviation`:
                     TransformState(State).Tdiff in Goal.RangeBelow(MaxDeviation)
             }
 
