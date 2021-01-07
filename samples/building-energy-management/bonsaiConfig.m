@@ -8,10 +8,10 @@ function config = bonsaiConfig()
     % config.url = "https://api.bons.ai";
 
     % bonsai workspace
-    config.workspace = "b76b7adc-532d-4237-9d5b-4d7a403f208f";
+    config.workspace = "<workspace_id>";
 
     % access key, generated from https://beta.bons.ai/brains/accounts/settings
-    config.accessKey = "NmJkZmUyMDI5ZTJkNDE0YmI4MmZmNTNjZWUwODkyMGU6OGQxZDBiNmUtNGJmMi00MzMxLWI5MGUtNDhiYjZhMWQyMmUw";
+    config.accessKey = "<key>";
 
     % simulator name, for an unmanaged simulator launched from the desktop to show up on the web
     config.name = "Simulink BuildingEnergyManagement";
